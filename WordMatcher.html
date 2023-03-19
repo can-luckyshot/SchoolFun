@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Word Connector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+  </head>
+  <body>
+    
+	<div class="container" id="iets">
+		<div class="row text-center"><div class="col-12"><h1>Word Matcher</h1></div></div>		
+	</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+	<script>
+		var wordsRaw = "het eigenbelang,falen,gevierd,heldhaftig,heroisch,het initiatief,de lofzang,nastreven,nomineren,onovertroffen,ophemelen,zich opofferen,rebels,tegendraads,uitmuntend,de verdienste,vereren,op een voetstuk plaatsen.,volharden,voordragen,in actie komen,astronomisch,de bravoure,buitengewoon,het eerbetoon,de erkenning,geducht,de lauwerkrans,de maatschappij,miskend,de ode,onthutsend,onverschrokken,het respect,spraakmakend,de status,de toewijding,triomferen,verbluffend,waarderen";
+		var defsRaw = "Het voordeel voor jezelf, wat alleen voor jezelf belangrijk is.|Mislukken, tekortschieten.|Beroemd en door iedereen geprezen.|Heroisch. Erg dapper en moedig, als een held.|Heldhaftig. Erg dapper en moedig, als een held.|De eerste aanzet tot iets. Voorstel dat je als eerste doet of actie die je als eersteonderneemt.|Een lied waarmee je iemand eert of prijst.|Proberen te bereiken.|Voorstellen om iemand een prijs te geven.|Uitstekend. Nog niet beter gedaan. Er bestaat geen betere van.|lets of iemand erg of overdreven prijzen.|Veel voor iets overhebben, zonder rekening te houden met je eigen voordeel.|Als iemand zich snel tegen iets verzet. Opstandig.|Gezegd van iemand die anders wil zijn of een andere mening heeft dan anderen.|Uitstekend, voortreffelijk.|lets goeds wat je hebt gedaan en waarvoor je lof verdient.|lemand diep bewonderen of eer bewijzen.|lemand erg bewonderen, tegen hem opkijken.|Doorgaan met iets, ook als het moeilijk wordt.|Als kandidaat voorstellen.|Aan de gang gaan, iets gaan doen.|Onvoorstelbaar groot.|Het gedrag waaruit blijkt dat je veel lef hebt.|Bijzonder, afwijkend.|Het bewijs dat je iemand vereert.|De waardering, de roem.|Gevreesd. Als je er best bang voor bent.|Een krans van laurierbladeren als teken van overwinning.|De samenleving. Alle mensen samen en de manieren waarop ze met elkaar omgaan.|Ten onrechte niet gewaardeerd.|Een lied of gedicht waarmee je iemand prijst of eert.|Verbijsterend. Je raakt erdoor van streek.|Zonder angst, dapper.|De waardering of erkenning voor wat iemand doet of hoe iemand is.|Als er veel over gesproken wordt, opzienbarend.|Je aanzien in de samenleving.|De aandacht en liefde voor iets wat je doet.|Een overwinning behalen, zegevieren.|Verbazingwekkend. Je staat er versteld van.|Goed of fijn vinden, op prijs stellen.";
+		
+		$(document).ready(function(){
+			console.log("generate puzzle");
+			var words = wordsRaw.split(',').map((word,index) => ({value: word, id: index})).sort( () => Math.random() - 0.5);
+			var definitions = defsRaw.split('|').map((def,index) => ({value: def, id: index})).sort( () => Math.random() - 0.5);
+									
+			for(var i=0;i<words.length;i++){
+				generateElement(words[i],definitions[i]);
+			}
+			generateCheckButton();
+		});			
+		
+		function generateElement(word,definition){
+		console.log("generate element");
+			var row = $("<div></div>").addClass("row justify-content-between");
+			
+			var inputA = $("<input></input>").addClass("form-check-input").attr("type","checkbox").attr("value",word.id);
+			var wordDiv = $("<div></div>").addClass("col-3 text-end bg-primary-subtle border rounded-3");
+			wordDiv.append(word.value);
+			wordDiv.append(inputA);
+			row.append(wordDiv);
+			
+			var inputB = $("<input></input>").addClass("form-check-input").attr("type","checkbox").attr("value",definition.id);
+			var defDiv = $("<div></div>").addClass("col-8 text-begin bg-primary-subtle border rounded-3");
+			defDiv.append(inputB);
+			defDiv.append(definition.value);			
+			row.append(defDiv);			
+			
+			$("#iets").append(row);
+		}
+		
+		function generateCheckButton(){			
+			var button = $("<button></button>").addClass("btn col-4 btn-primary").attr("type","button");
+			button.append("Controleer");
+			button.click(validate);
+			var row = $("<div></div>").addClass("row justify-content-center");
+			row.append(button);	
+			$("#iets").append(row);
+		}
+		
+		function validate(){
+			var inputs = $("input:checked");
+			if(inputs != undefined && inputs.length == 2){
+				console.log("right amount");
+				var inputA = inputs[0];
+				var inputB = inputs[1];
+				console.log("inputA: "+inputA.value);
+				console.log("inputB: "+inputB.value);
+				if(inputA.value == inputB.value){
+					$(inputA).parent().removeClass("bg-primary-subtle").addClass("bg-success");
+					$(inputB).parent().removeClass("bg-primary-subtle").addClass("bg-success");					
+				}
+				else{
+					console.log("incorrect");
+				}
+				$(inputA).prop("checked", false);
+				$(inputB).prop("checked", false);
+			}
+			else if (inputs != undefined){
+				console.log("wrong amount");
+				inputs.forEach(function(input){
+					$(input).prop("checked", false);
+				});				
+			}
+			else{
+				console.log("no selection");
+			}
+		}
+	</script>
+	
+  </body>
+</html>
+</html>
