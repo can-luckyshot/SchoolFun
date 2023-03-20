@@ -6,7 +6,7 @@
     <title>Word Matcher</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
   </head>
-  <body>
+  <body class="bg-dark-subtle">
     
 	<div class="container" id="iets">
 		<div class="row text-center"><div class="col-12"><h1>Word Matcher</h1></div></div>		
@@ -16,39 +16,40 @@
 	<script>
 		var wordsRaw = "het eigenbelang,falen,gevierd,heldhaftig,heroisch,het initiatief,de lofzang,nastreven,nomineren,onovertroffen,ophemelen,zich opofferen,rebels,tegendraads,uitmuntend,de verdienste,vereren,op een voetstuk plaatsen.,volharden,voordragen,in actie komen,astronomisch,de bravoure,buitengewoon,het eerbetoon,de erkenning,geducht,de lauwerkrans,de maatschappij,miskend,de ode,onthutsend,onverschrokken,het respect,spraakmakend,de status,de toewijding,triomferen,verbluffend,waarderen";
 		var defsRaw = "Het voordeel voor jezelf, wat alleen voor jezelf belangrijk is.|Mislukken, tekortschieten.|Beroemd en door iedereen geprezen.|Heroisch. Erg dapper en moedig, als een held.|Heldhaftig. Erg dapper en moedig, als een held.|De eerste aanzet tot iets. Voorstel dat je als eerste doet of actie die je als eersteonderneemt.|Een lied waarmee je iemand eert of prijst.|Proberen te bereiken.|Voorstellen om iemand een prijs te geven.|Uitstekend. Nog niet beter gedaan. Er bestaat geen betere van.|lets of iemand erg of overdreven prijzen.|Veel voor iets overhebben, zonder rekening te houden met je eigen voordeel.|Als iemand zich snel tegen iets verzet. Opstandig.|Gezegd van iemand die anders wil zijn of een andere mening heeft dan anderen.|Uitstekend, voortreffelijk.|lets goeds wat je hebt gedaan en waarvoor je lof verdient.|lemand diep bewonderen of eer bewijzen.|lemand erg bewonderen, tegen hem opkijken.|Doorgaan met iets, ook als het moeilijk wordt.|Als kandidaat voorstellen.|Aan de gang gaan, iets gaan doen.|Onvoorstelbaar groot.|Het gedrag waaruit blijkt dat je veel lef hebt.|Bijzonder, afwijkend.|Het bewijs dat je iemand vereert.|De waardering, de roem.|Gevreesd. Als je er best bang voor bent.|Een krans van laurierbladeren als teken van overwinning.|De samenleving. Alle mensen samen en de manieren waarop ze met elkaar omgaan.|Ten onrechte niet gewaardeerd.|Een lied of gedicht waarmee je iemand prijst of eert.|Verbijsterend. Je raakt erdoor van streek.|Zonder angst, dapper.|De waardering of erkenning voor wat iemand doet of hoe iemand is.|Als er veel over gesproken wordt, opzienbarend.|Je aanzien in de samenleving.|De aandacht en liefde voor iets wat je doet.|Een overwinning behalen, zegevieren.|Verbazingwekkend. Je staat er versteld van.|Goed of fijn vinden, op prijs stellen.";
+		var words = wordsRaw.split(',').map((word,index) => ({value: word, id: index})).sort( () => Math.random() - 0.5);
+		var definitions = defsRaw.split('|').map((def,index) => ({value: def, id: index})).sort( () => Math.random() - 0.5);
 		
-		$(document).ready(function(){
-			console.log("generate puzzle");
-			var words = wordsRaw.split(',').map((word,index) => ({value: word, id: index})).sort( () => Math.random() - 0.5);
-			var definitions = defsRaw.split('|').map((def,index) => ({value: def, id: index})).sort( () => Math.random() - 0.5);
-									
-			for(var i=0;i<words.length;i++){
-				generateElement(words[i],definitions[i]);
-			}
+		$(document).ready(function(){			
 			generateCheckButton();
-		});			
+			generatePuzzle();
+		});
+
+		function generatePuzzle(){
+			console.log("generate puzzle: "+words.length);
+			var row = $("<div></div>").addClass("row justify-content-between mt-1").attr("id","itemGrid");;						
+			for(var i=0;i<words.length;i++){				
+				generateElement(words[i],definitions[i],row);				
+			}
+			$("#iets").append(row);			
+		}
 		
-		function generateElement(word,definition){
-		console.log("generate element");
-			var row = $("<div></div>").addClass("row justify-content-between");
-			
+		
+		function generateElement(word,definition,row){
 			var inputA = $("<input></input>").addClass("form-check-input").attr("type","checkbox").attr("value",word.id);
-			var wordDiv = $("<div></div>").addClass("col-3 text-end bg-primary-subtle border rounded-3");
+			var wordDiv = $("<div></div>").addClass("col-3 mt-1 text-end bg-primary-subtle border rounded-3");
 			wordDiv.append(word.value);
 			wordDiv.append(inputA);
 			row.append(wordDiv);
 			
 			var inputB = $("<input></input>").addClass("form-check-input").attr("type","checkbox").attr("value",definition.id);
-			var defDiv = $("<div></div>").addClass("col-8 text-begin bg-primary-subtle border rounded-3");
+			var defDiv = $("<div></div>").addClass("col-8 mt-1 text-begin bg-primary-subtle border rounded-3");
 			defDiv.append(inputB);
 			defDiv.append(definition.value);			
 			row.append(defDiv);			
-			
-			$("#iets").append(row);
 		}
 		
 		function generateCheckButton(){			
-			var button = $("<button></button>").addClass("btn col-4 btn-primary").attr("type","button");
+			var button = $("<button></button>").addClass("btn mt-3 col-4 btn-primary").attr("type","button");
 			button.append("Controleer");
 			button.click(validate);
 			var row = $("<div></div>").addClass("row justify-content-center");
@@ -65,8 +66,12 @@
 				console.log("inputA: "+inputA.value);
 				console.log("inputB: "+inputB.value);
 				if(inputA.value == inputB.value){
-					$(inputA).parent().removeClass("bg-primary-subtle").addClass("bg-success");
-					$(inputB).parent().removeClass("bg-primary-subtle").addClass("bg-success");					
+					console.log("correct");
+					words = words.filter( el => ""+el.id !== inputA.value);
+					definitions = definitions.filter( el => ""+el.id !== inputA.value);					
+					
+					$("#itemGrid").remove();
+					generatePuzzle();
 				}
 				else{
 					console.log("incorrect");
@@ -84,8 +89,6 @@
 				console.log("no selection");
 			}
 		}
-	</script>
-	
+	</script>	
   </body>
-</html>
 </html>
